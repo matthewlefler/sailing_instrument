@@ -20,9 +20,6 @@ esp-println = { version = "0.18.0", features = ["esp32s3"] }
 [profile.dev]
 # The default debug profile is too slow and too big for resource-constrained devices.
 opt-level = "s"       # Always build with some optimizations enabled.
-codegen-units = 1     # LLVM can perform better optimizations using a single thread
-debug         = 0     # none
-lto           = 'fat'
 
 [profile.release]
 codegen-units = 1     # LLVM can perform better optimizations using a single thread
