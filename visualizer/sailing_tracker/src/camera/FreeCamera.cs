@@ -37,12 +37,15 @@ public class FreeCamera
                        Matrix.CreateRotationY(Yaw);
         var forward = Vector3.Transform(Vector3.Forward, rotation);
         var right = Vector3.Transform(Vector3.Right, rotation);
+        var up = Vector3.Transform(Vector3.Up, rotation);
 
         // Movement
         if (kb.IsKeyDown(Keys.W)) Position += forward * Speed * dt;
         if (kb.IsKeyDown(Keys.S)) Position -= forward * Speed * dt;
         if (kb.IsKeyDown(Keys.A)) Position -= right * Speed * dt;
         if (kb.IsKeyDown(Keys.D)) Position += right * Speed * dt;
+        if (kb.IsKeyDown(Keys.E)) Position += up * Speed * dt;
+        if (kb.IsKeyDown(Keys.Q)) Position -= up * Speed * dt;
 
         _view = Matrix.CreateLookAt(Position, Position + forward, Vector3.Up);
     }

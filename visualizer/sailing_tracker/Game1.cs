@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using connection;
 using Microsoft.VisualBasic;
 using Microsoft.Xna.Framework;
@@ -12,13 +13,64 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private FreeCamera freeCamera = new FreeCamera(1.0f, Vector3.Forward);
+    private FreeCamera freeCamera = new FreeCamera(TargetAspectRatio, Vector3.Backward);
+
+    VertexPositionColor[] axes = new[]
+    {
+        new VertexPositionColor(Vector3.Zero, Color.Red),
+        new VertexPositionColor(Vector3.UnitX * 2f, Color.Red),
+
+        new VertexPositionColor(Vector3.Zero, Color.Green),
+        new VertexPositionColor(Vector3.UnitY * 2f, Color.Green),
+
+        new VertexPositionColor(Vector3.Zero, Color.Blue),
+        new VertexPositionColor(Vector3.UnitZ * 2f, Color.Blue)
+    };
+
+    private const float TargetAspectRatio = 1f / 1f;
+    private void SetAspectRatioViewport()
+    {
+        int width = Window.ClientBounds.Width;
+        int height = Window.ClientBounds.Height;
+
+        if (width <= 0 || height <= 0)
+            return;
+
+        float windowAspectRatio = (float)width / height;
+        int viewportWidth;
+        int viewportHeight;
+
+        if (windowAspectRatio > TargetAspectRatio)
+        {
+            viewportHeight = height;
+            viewportWidth = (int)(height * TargetAspectRatio);
+        }
+        else
+        {
+            viewportWidth = width;
+            viewportHeight = (int)(width / TargetAspectRatio);
+        }
+
+        GraphicsDevice.Viewport = new Viewport(
+            (width - viewportWidth) / 2,
+            (height - viewportHeight) / 2,
+            viewportWidth,
+            viewportHeight
+        );
+    }
 
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
+
+        _graphics.PreferredBackBufferWidth = 1280;
+        _graphics.PreferredBackBufferHeight = 720;
+        _graphics.IsFullScreen = false;
+
+        Window.AllowUserResizing = true;
+
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
+        IsMouseVisible = false;
     }
 
     private Connection connection;
@@ -39,44 +91,72 @@ public class Game1 : Game
         _effect = new BasicEffect(GraphicsDevice)
         {
             VertexColorEnabled = true,
-            View = Matrix.CreateLookAt(
-                new Vector3(0, 0, 5), Vector3.Zero, Vector3.Up),
-            Projection = Matrix.CreatePerspectiveFieldOfView(
-                MathHelper.ToRadians(45f),
-                GraphicsDevice.Viewport.AspectRatio, 0.1f, 100f)
         };
     }
 
-    List<TrackerData> data = new();
+    private List<TrackerData> data = new();
+    private bool focused = true;
+    private KeyboardState previous_kb_state = Keyboard.GetState();
     protected override void Update(GameTime gameTime)
     {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+        KeyboardState kb = Keyboard.GetState();
+        MouseState mouse = Mouse.GetState();
+
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || (kb.IsKeyDown(Keys.LeftAlt) && kb.IsKeyDown(Keys.F4)))
         {
             Exit();
         }
-        // TODO: Add your update logic here
+
+        Point screenCentre = new Point(
+            GraphicsDevice.Viewport.Width / 2,
+            GraphicsDevice.Viewport.Height / 2
+        );
+        
+        if(kb.IsKeyDown(Keys.Escape) && previous_kb_state.IsKeyUp(Keys.Escape))
+        {
+            focused = !focused;
+            if(focused)
+            {
+                IsMouseVisible = false;
+            }
+            else
+            {
+                IsMouseVisible = true;
+                Mouse.SetPosition(screenCentre.X, screenCentre.Y);
+            }
+        }
+
         data.AddRange(connection.read());
         if(data.Count > short.MaxValue)
         {
             data.RemoveRange(0, data.Count - short.MaxValue);
         }
 
-        KeyboardState kb = Keyboard.GetState();
-        MouseState mouse = Mouse.GetState();
 
-        Point screenCentre = new Point(
-            GraphicsDevice.Viewport.Width / 2,
-            GraphicsDevice.Viewport.Height / 2
-        );
 
-        freeCamera.Update(gameTime, kb, mouse, screenCentre);
+        if(focused)
+        {
+            freeCamera.Update(gameTime, kb, mouse, screenCentre);
+            Mouse.SetPosition(screenCentre.X, screenCentre.Y);
+        }
+
+        previous_kb_state = kb;
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.DarkGray);
+        if(focused)
+        {
+            GraphicsDevice.Clear(new Color(90, 90, 90));
+        } 
+        else
+        {
+            GraphicsDevice.Clear(new Color(10, 10, 10));
+        }
+
+        SetAspectRatioViewport();
 
         _effect.World = Matrix.Identity;
         _effect.View = freeCamera.View;
@@ -106,6 +186,17 @@ public class Game1 : Game
                     vertices.Length >> 1 // number of primitives to draw
                 );
             }
+        }
+
+        foreach (var pass in _effect.CurrentTechnique.Passes)
+        {
+            pass.Apply();
+            GraphicsDevice.DrawUserPrimitives(
+                PrimitiveType.LineList,
+                axes,
+                0,
+                3 // three line segments
+            );
         }
 
         base.Draw(gameTime);
