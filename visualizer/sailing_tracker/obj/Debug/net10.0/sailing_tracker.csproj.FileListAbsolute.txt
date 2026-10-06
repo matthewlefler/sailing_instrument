@@ -1,7 +1,0 @@
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/mgcb.tool.restore
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.csproj.AssemblyReference.cache
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.GeneratedMSBuildEditorConfig.editorconfig
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.AssemblyInfoInputs.cache
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.AssemblyInfo.cs
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.csproj.CoreCompileInputs.cache
-/home/skye/gitrepos/sailing_instrument/visualizer/sailing_tracker/obj/Debug/net10.0/sailing_tracker.sourcelink.json
