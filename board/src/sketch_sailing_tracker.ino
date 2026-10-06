@@ -107,7 +107,7 @@ void loop() {
     }
   }
 
-  Serial.printf("P %f %f %f\n", position_x, position_y, position_z);
+  Serial.printf("%f %f %f 0 0 0\n", position_x, position_y, position_z);
   // Serial.printf("GYRO: x %f, y %f, z %f\n", absolute_gyro_x, absolute_gyro_y, absolute_gyro_z);
 
   // If the BNO085 resets, its reports must be enabled again.
